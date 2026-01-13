@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LeetCode 1–3806 Tracker</title>
+
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #111827;
+    --text: #e5e7eb;
+    --border: #1f2933;
+  }
+
+  * {
+    box-sizing: border-box;
+    font-family: "Inter", system-ui, sans-serif;
+  }
+
+  body {
+    margin: 0;
+    background: radial-gradient(circle at top, #1e293b, #020617);
+    color: var(--text);
+  }
+
+  header {
+    padding: 16px;
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .card {
+    perspective: 1000px;
+  }
+
+  .inner {
+    position: relative;
+    width: 100%;
+    height: 140px;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    cursor: pointer;
+  }
+
+  .card.flipped .inner {
+    transform: rotateY(180deg);
+  }
+
+  .face {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(145deg, #0b1220, #020617);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    padding: 10px;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .front {
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .number {
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .status {
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+
+  .to-attempt { background: #facc15; color: #000; }
+  .trying     { background: #38bdf8; color: #000; }
+  .completed  { background: #22c55e; color: #000; }
+  .stuck      { background: #ef4444; color: #fff; }
+
+  .back {
+    transform: rotateY(180deg);
+    gap: 6px;
+  }
+
+  textarea {
+    width: 100%;
+    height: 60px;
+    background: #020617;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 6px;
+    resize: none;
+    font-size: 12px;
+  }
+
+  select {
+    background: #020617;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px;
+    font-size: 12px;
+  }
+
+  @media (max-width: 600px) {
+    .inner { height: 120px; }
+  }
+</style>
+</head>
+
+<body>
+
+<header>🔥 LeetCode 1 → 3806 Progress Tracker</header>
+
+<div class="grid" id="grid"></div>
+
+<script>
+  const grid = document.getElementById("grid");
+  const TOTAL = 3806;
+
+  const statusClass = {
+    "To Attempt": "to-attempt",
+    "Trying": "trying",
+    "Completed": "completed",
+    "Stuck": "stuck"
+  };
+
+  for (let i = 1; i <= TOTAL; i++) {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const inner = document.createElement("div");
+    inner.className = "inner";
+
+    const front = document.createElement("div");
+    front.className = "face front";
+
+    const num = document.createElement("div");
+    num.className = "number";
+    num.textContent = i;
+
+    const status = document.createElement("div");
+    status.className = "status to-attempt";
+    status.textContent = "To Attempt";
+
+    front.append(num, status);
+
+    const back = document.createElement("div");
+    back.className = "face back";
+
+    const select = document.createElement("select");
+    ["To Attempt", "Trying", "Completed", "Stuck"].forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s;
+      opt.textContent = s;
+      select.appendChild(opt);
+    });
+
+    const notes = document.createElement("textarea");
+    notes.placeholder = "Write notes / approach / mistakes...";
+
+    back.append(select, notes);
+
+    select.addEventListener("change", () => {
+      status.textContent = select.value;
+      status.className = "status " + statusClass[select.value];
+    });
+
+    inner.append(front, back);
+    card.appendChild(inner);
+    grid.appendChild(card);
+
+    card.addEventListener("click", e => {
+      if (e.target.tagName !== "TEXTAREA" && e.target.tagName !== "SELECT") {
+        card.classList.toggle("flipped");
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
