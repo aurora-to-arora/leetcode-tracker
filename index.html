@@ -7,15 +7,15 @@
 
 <style>
   :root {
-    --bg: #0f172a;
-    --card: #111827;
+    --bg: #020617;
+    --card: #020617;
     --text: #e5e7eb;
-    --border: #1f2933;
+    --border: #1f2937;
   }
 
   * {
     box-sizing: border-box;
-    font-family: "Inter", system-ui, sans-serif;
+    font-family: Inter, system-ui, sans-serif;
   }
 
   body {
@@ -25,11 +25,10 @@
   }
 
   header {
-    padding: 16px;
     text-align: center;
+    padding: 16px;
     font-size: 22px;
     font-weight: 700;
-    letter-spacing: 0.5px;
   }
 
   .grid {
@@ -44,9 +43,8 @@
   }
 
   .inner {
-    position: relative;
-    width: 100%;
     height: 140px;
+    position: relative;
     transition: transform 0.6s;
     transform-style: preserve-3d;
     cursor: pointer;
@@ -59,9 +57,9 @@
   .face {
     position: absolute;
     inset: 0;
-    background: linear-gradient(145deg, #0b1220, #020617);
     border-radius: 14px;
     border: 1px solid var(--border);
+    background: linear-gradient(145deg, #0b1220, #020617);
     padding: 10px;
     backface-visibility: hidden;
     display: flex;
@@ -82,40 +80,34 @@
 
   .status {
     font-size: 12px;
+    font-weight: 600;
     padding: 4px 8px;
     border-radius: 999px;
-    font-weight: 600;
   }
 
   .to-attempt { background: #facc15; color: #000; }
-  .trying     { background: #38bdf8; color: #000; }
-  .completed  { background: #22c55e; color: #000; }
-  .stuck      { background: #ef4444; color: #fff; }
+  .trying { background: #38bdf8; color: #000; }
+  .completed { background: #22c55e; color: #000; }
+  .stuck { background: #ef4444; color: #fff; }
 
   .back {
     transform: rotateY(180deg);
     gap: 6px;
   }
 
-  textarea {
+  select, textarea {
     width: 100%;
-    height: 60px;
     background: #020617;
-    border: 1px solid var(--border);
     color: var(--text);
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 6px;
-    resize: none;
     font-size: 12px;
   }
 
-  select {
-    background: #020617;
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 6px;
-    font-size: 12px;
+  textarea {
+    height: 60px;
+    resize: none;
   }
 
   @media (max-width: 600px) {
@@ -126,13 +118,15 @@
 
 <body>
 
-<header>🔥 LeetCode 1 → 3806 Progress Tracker</header>
+<header>🔥 LeetCode Progress Tracker (1 → 3806)</header>
 
 <div class="grid" id="grid"></div>
 
 <script>
-  const grid = document.getElementById("grid");
   const TOTAL = 3806;
+  const grid = document.getElementById("grid");
+
+  const STORAGE_KEY = "leetcode_tracker_v1";
 
   const statusClass = {
     "To Attempt": "to-attempt",
@@ -141,7 +135,19 @@
     "Stuck": "stuck"
   };
 
+  function loadData() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  }
+
+  function saveData(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  const savedData = loadData();
+
   for (let i = 1; i <= TOTAL; i++) {
+    const id = i.toString();
+
     const card = document.createElement("div");
     card.className = "card";
 
@@ -151,15 +157,15 @@
     const front = document.createElement("div");
     front.className = "face front";
 
-    const num = document.createElement("div");
-    num.className = "number";
-    num.textContent = i;
+    const number = document.createElement("div");
+    number.className = "number";
+    number.textContent = i;
 
     const status = document.createElement("div");
     status.className = "status to-attempt";
     status.textContent = "To Attempt";
 
-    front.append(num, status);
+    front.append(number, status);
 
     const back = document.createElement("div");
     back.className = "face back";
@@ -173,18 +179,39 @@
     });
 
     const notes = document.createElement("textarea");
-    notes.placeholder = "Write notes / approach / mistakes...";
+    notes.placeholder = "Notes / approach / mistakes...";
 
     back.append(select, notes);
+    inner.append(front, back);
+    card.appendChild(inner);
+    grid.appendChild(card);
+
+    // Restore saved data
+    if (savedData[id]) {
+      status.textContent = savedData[id].status;
+      status.className = "status " + statusClass[savedData[id].status];
+      select.value = savedData[id].status;
+      notes.value = savedData[id].notes || "";
+    }
 
     select.addEventListener("change", () => {
       status.textContent = select.value;
       status.className = "status " + statusClass[select.value];
+
+      savedData[id] = {
+        status: select.value,
+        notes: notes.value
+      };
+      saveData(savedData);
     });
 
-    inner.append(front, back);
-    card.appendChild(inner);
-    grid.appendChild(card);
+    notes.addEventListener("input", () => {
+      savedData[id] = {
+        status: select.value,
+        notes: notes.value
+      };
+      saveData(savedData);
+    });
 
     card.addEventListener("click", e => {
       if (e.target.tagName !== "TEXTAREA" && e.target.tagName !== "SELECT") {
